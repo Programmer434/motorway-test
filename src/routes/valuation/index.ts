@@ -1,8 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { VehicleValuationRequest } from './types/vehicle-valuation-request';
-// import { fetchValuationFromSuperCarValuation } from '@app/super-car/super-car-valuation';
-// import { VehicleValuation } from '@app/models/vehicle-valuation';
 import { VehicleStore } from '@app/repository/vehicleStore';
+import { fetchValuationFromSuperCarValuation } from '@app/super-car/super-car-valuation';
 
 export function valuationRoutes(fastify: FastifyInstance) {
   fastify.get<{
@@ -10,7 +9,6 @@ export function valuationRoutes(fastify: FastifyInstance) {
       vrm: string;
     };
   }>('/valuations/:vrm', async (request, reply) => {
-    // const valuationRepository = fastify.orm.getRepository(VehicleValuation);
     const db = await VehicleStore.build();
 
     const { vrm } = request.params;
@@ -57,14 +55,8 @@ export function valuationRoutes(fastify: FastifyInstance) {
       });
     }
 
-    // const valuation = await fetchValuationFromSuperCarValuation(vrm, mileage);
-    const valuation = {
-      highestValue: 1000,
-      lowestValue: 1000,
-      midpointValue: 1000,
-      vrm: 'ABC123',
-      id: 1,
-    };
+    const valuation = await fetchValuationFromSuperCarValuation(vrm, mileage);
+
     // Save to DB.
     await db.insert(valuation).catch((err) => {
       if (err.code !== 'SQLITE_CONSTRAINT') {

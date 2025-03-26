@@ -6,8 +6,22 @@ vi.mock('../../../super-car/super-car-valuation');
 vi.mock('../../../repository/vehicleStore');
 
 describe('ValuationController (e2e)', () => {
+  let supercarResponse: SuperCarValuationResponse = {
+    highestValue: 1000,
+    lowestValue: 1000,
+    midpointValue: 1000,
+    vrm: 'ABC123',
+  };
   beforeEach(() => {
     vi.resetAllMocks();
+
+    vi.mocked(VehicleStore.prototype.findOneVRM).mockResolvedValue(null);
+    vi.mocked(VehicleStore.prototype.insert).mockResolvedValue();
+    vi.mocked(VehicleStore.build).mockResolvedValue(new VehicleStore());
+
+    vi.mocked(
+      superCarCall.fetchValuationFromSuperCarValuation,
+    ).mockResolvedValue(supercarResponse);
   });
 
   describe('PUT /valuations/', () => {
@@ -82,9 +96,9 @@ describe('ValuationController (e2e)', () => {
         vrm: 'ABC123',
       });
 
-      vi.mocked(VehicleStore.prototype.findOneVRM).mockResolvedValue(null);
-      vi.mocked(VehicleStore.prototype.insert).mockResolvedValue();
-      vi.mocked(VehicleStore.build).mockResolvedValue(new VehicleStore());
+      // vi.mocked(VehicleStore.prototype.findOneVRM).mockResolvedValue(null);
+      // vi.mocked(VehicleStore.prototype.insert).mockResolvedValue();
+      // vi.mocked(VehicleStore.build).mockResolvedValue(new VehicleStore());
 
       const res = await fastify.inject({
         url: '/valuations/ABC123',
@@ -93,6 +107,39 @@ describe('ValuationController (e2e)', () => {
       });
 
       expect(res.statusCode).toStrictEqual(200);
+    });
+  });
+
+  describe('GET /valuations/', () => {
+    it('should return 404 if VRM is not found', async () => {
+      const res = await fastify.inject({
+        url: '/valuations/ABC123',
+        method: 'GET',
+      });
+
+      expect(res.statusCode).toStrictEqual(404);
+    });
+
+    it('should return 200 with valid request', async () => {
+      vi.mocked(VehicleStore.prototype.findOneVRM).mockResolvedValue({
+        highestValue: 1000,
+        lowestValue: 1000,
+        midpointValue: 1000,
+        vrm: 'ABC123',
+      });
+
+      const res = await fastify.inject({
+        url: '/valuations/ABC123',
+        method: 'GET',
+      });
+
+      expect(res.statusCode).toStrictEqual(200);
+      expect(res.json()).toStrictEqual({
+        highestValue: 1000,
+        lowestValue: 1000,
+        midpointValue: 1000,
+        vrm: 'ABC123',
+      });
     });
   });
 });

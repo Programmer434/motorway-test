@@ -12,6 +12,7 @@ export class VehicleStore {
   }
 
   public static async build() {
+    //create a singleton instance of the database
     const db = getDB();
     await db.initialize();
     return new VehicleStore(db.getRepository(VehicleValuation));
