@@ -2,11 +2,12 @@ import { fastify } from '~root/test/fastify';
 import { VehicleValuationRequest } from '../types/vehicle-valuation-request';
 import * as superCarCall from '../../../super-car/super-car-valuation';
 import { VehicleStore } from '@app/repository/vehicleStore';
+import { VehicleValuation } from '@app/models/vehicle-valuation';
 vi.mock('../../../super-car/super-car-valuation');
 vi.mock('../../../repository/vehicleStore');
 
 describe('ValuationController (e2e)', () => {
-  let supercarResponse: SuperCarValuationResponse = {
+  const supercarResponse: VehicleValuation = {
     highestValue: 1000,
     lowestValue: 1000,
     midpointValue: 1000,
