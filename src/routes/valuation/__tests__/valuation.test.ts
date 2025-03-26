@@ -1,18 +1,11 @@
 import { fastify } from '~root/test/fastify';
 import { VehicleValuationRequest } from '../types/vehicle-valuation-request';
-import * as superCarCall from '../../../super-car/super-car-valuation';
 import { VehicleStore } from '@app/repository/vehicleStore';
-import { VehicleValuation } from '@app/models/vehicle-valuation';
-vi.mock('../../../super-car/super-car-valuation');
+import { ValuationClient } from '@app/http-client/valuation-client';
 vi.mock('../../../repository/vehicleStore');
+vi.mock('../../../http-client/valuation-client');
 
 describe('ValuationController (e2e)', () => {
-  const supercarResponse: VehicleValuation = {
-    highestValue: 1000,
-    lowestValue: 1000,
-    midpointValue: 1000,
-    vrm: 'ABC123',
-  };
   beforeEach(() => {
     vi.resetAllMocks();
 
@@ -20,9 +13,12 @@ describe('ValuationController (e2e)', () => {
     vi.mocked(VehicleStore.prototype.insert).mockResolvedValue();
     vi.mocked(VehicleStore.build).mockResolvedValue(new VehicleStore());
 
-    vi.mocked(
-      superCarCall.fetchValuationFromSuperCarValuation,
-    ).mockResolvedValue(supercarResponse);
+    vi.mocked(ValuationClient.prototype.getValuation).mockResolvedValue({
+      highestValue: 1000,
+      lowestValue: 1000,
+      midpointValue: 1000,
+      vrm: 'ABC123',
+    });
   });
 
   describe('PUT /valuations/', () => {
@@ -87,19 +83,6 @@ describe('ValuationController (e2e)', () => {
       const requestBody: VehicleValuationRequest = {
         mileage: 10000,
       };
-
-      vi.mocked(
-        superCarCall.fetchValuationFromSuperCarValuation,
-      ).mockResolvedValue({
-        highestValue: 1000,
-        lowestValue: 1000,
-        midpointValue: 1000,
-        vrm: 'ABC123',
-      });
-
-      // vi.mocked(VehicleStore.prototype.findOneVRM).mockResolvedValue(null);
-      // vi.mocked(VehicleStore.prototype.insert).mockResolvedValue();
-      // vi.mocked(VehicleStore.build).mockResolvedValue(new VehicleStore());
 
       const res = await fastify.inject({
         url: '/valuations/ABC123',

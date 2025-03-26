@@ -126,3 +126,6 @@ TODO
 
 pool db connections
 log on slow queries
+exponential backoffs on api calls
+use redis to centeralise overall %failure rates
+dockerfile

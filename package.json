@@ -15,6 +15,7 @@
   "dependencies": {
     "axios": "1.6.8",
     "dotenv": "16.4.5",
+    "fast-xml-parser": "^5.0.9",
     "fastify": "4.26.2",
     "pino": "9.0.0",
     "pino-pretty": "11.0.0",
@@ -36,6 +37,7 @@
     "c8": "9.1.0",
     "eslint": "9.1.1",
     "jsdom": "24.0.0",
+    "nock": "^14.0.1",
     "prettier": "3.2.5",
     "typescript": "5.4.5",
     "typescript-eslint": "7.7.1",

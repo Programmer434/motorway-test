@@ -1,7 +1,9 @@
 import { FastifyInstance } from 'fastify';
 import { VehicleValuationRequest } from './types/vehicle-valuation-request';
 import { VehicleStore } from '@app/repository/vehicleStore';
-import { fetchValuationFromSuperCarValuation } from '@app/super-car/super-car-valuation';
+import { PremiumCarClient } from '@app/http-client/premiumcar-client';
+import { SuperCarClient } from '@app/http-client/supercar-client';
+import { ValuationClient } from '@app/http-client/valuation-client';
 
 export function valuationRoutes(fastify: FastifyInstance) {
   fastify.get<{
@@ -13,6 +15,7 @@ export function valuationRoutes(fastify: FastifyInstance) {
 
     const { vrm } = request.params;
 
+    //TODO could move validation logic to middleware
     if (vrm === null || vrm === '' || vrm.length > 7) {
       return reply
         .code(400)
@@ -55,7 +58,12 @@ export function valuationRoutes(fastify: FastifyInstance) {
       });
     }
 
-    const valuation = await fetchValuationFromSuperCarValuation(vrm, mileage);
+    const valuationClient = new ValuationClient(
+      new SuperCarClient(),
+      new PremiumCarClient(),
+    );
+
+    const valuation = await valuationClient.getValuation(vrm, mileage);
 
     // Save to DB.
     await db.insert(valuation).catch((err) => {
