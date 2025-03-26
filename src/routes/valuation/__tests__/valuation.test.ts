@@ -1,7 +1,15 @@
 import { fastify } from '~root/test/fastify';
 import { VehicleValuationRequest } from '../types/vehicle-valuation-request';
+import * as superCarCall from '../../../super-car/super-car-valuation';
+import { VehicleStore } from '@app/repository/vehicleStore';
+vi.mock('../../../super-car/super-car-valuation');
+vi.mock('../../../repository/vehicleStore');
 
 describe('ValuationController (e2e)', () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+  });
+
   describe('PUT /valuations/', () => {
     it('should return 404 if VRM is missing', async () => {
       const requestBody: VehicleValuationRequest = {
@@ -64,6 +72,19 @@ describe('ValuationController (e2e)', () => {
       const requestBody: VehicleValuationRequest = {
         mileage: 10000,
       };
+
+      vi.mocked(
+        superCarCall.fetchValuationFromSuperCarValuation,
+      ).mockResolvedValue({
+        highestValue: 1000,
+        lowestValue: 1000,
+        midpointValue: 1000,
+        vrm: 'ABC123',
+      });
+
+      vi.mocked(VehicleStore.prototype.findOneVRM).mockResolvedValue(null);
+      vi.mocked(VehicleStore.prototype.insert).mockResolvedValue();
+      vi.mocked(VehicleStore.build).mockResolvedValue(new VehicleStore());
 
       const res = await fastify.inject({
         url: '/valuations/ABC123',
