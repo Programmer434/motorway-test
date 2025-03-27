@@ -67,4 +67,62 @@ describe('Supercar client', () => {
     expect(valuation.lowestValue).toBe(9999);
     expect(valuation.highestValue).toBe(8888);
   });
+
+  it('triggers into failover mode', async () => {
+    const valuationClient = new ValuationClient(
+      new SuperCarClient(superCarUrl),
+      new PremiumCarClient(premiumCarUrl),
+    );
+
+    //super car fails, so it should use premium car
+    nock(superCarUrl).get(path).reply(500);
+
+    nock(premiumCarUrl)
+      .get(path)
+      .reply(
+        200,
+        `
+        <?xml version="1.0" encoding="UTF-8" ?>
+          <root>
+            <RegistrationDate>2012-06-14T00:00:00.0000000</RegistrationDate>
+            <RegistrationYear>2001</RegistrationYear>
+            <RegistrationMonth>10</RegistrationMonth>
+            <ValuationPrivateSaleMinimum>11500</ValuationPrivateSaleMinimum>
+            <ValuationPrivateSaleMaximum>12750</ValuationPrivateSaleMaximum>
+            <ValuationDealershipMinimum>9999</ValuationDealershipMinimum>
+            <ValuationDealershipMaximum>8888</ValuationDealershipMaximum>
+          </root>
+        `,
+      );
+
+    const valuation = await valuationClient.getValuation('ABC1234', 1000); //premiumcar
+    expect(valuation.vrm).toBe('ABC1234');
+    //These were intentionally changed to test the fallback
+    expect(valuation.lowestValue).toBe(9999);
+    expect(valuation.highestValue).toBe(8888);
+
+    //theres no min threshold for failover, so it should trigger on the next call
+    nock(premiumCarUrl)
+      .get(path)
+      .reply(
+        200,
+        `
+        <?xml version="1.0" encoding="UTF-8" ?>
+          <root>
+            <RegistrationDate>2012-06-14T00:00:00.0000000</RegistrationDate>
+            <RegistrationYear>2001</RegistrationYear>
+            <RegistrationMonth>10</RegistrationMonth>
+            <ValuationPrivateSaleMinimum>11500</ValuationPrivateSaleMinimum>
+            <ValuationPrivateSaleMaximum>12750</ValuationPrivateSaleMaximum>
+            <ValuationDealershipMinimum>7777</ValuationDealershipMinimum>
+            <ValuationDealershipMaximum>6666</ValuationDealershipMaximum>
+          </root>
+        `,
+      );
+    const valuation2 = await valuationClient.getValuation('ABC1234', 1000); //premiumcar
+    expect(valuation2.vrm).toBe('ABC1234');
+    //These were intentionally changed to test the fallback
+    expect(valuation2.lowestValue).toBe(7777);
+    expect(valuation2.highestValue).toBe(6666);
+  });
 });

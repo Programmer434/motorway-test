@@ -123,7 +123,7 @@ Here is a place for you to put any notes regarding the changes you made and the 
 TODO
 /health
 /readiness endpoints
-
+set a minimum threshold for failover
 pool db connections
 log on slow queries
 exponential backoffs on api calls
