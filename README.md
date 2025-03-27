@@ -133,14 +133,14 @@ Changes made:
 These changes are broken down by each commit into the repo.
 
 Some further changes which could be made are:
-/health + /readiness endpoints
-set a minimum threshold for when to failover to backup API call
-Add a pool to the DB
-log on slow queries
-add RequestIds to each call
-exponential backoffs on api calls
-use redis to centeralise overall %failure rates
-swagger/openAPI spec for the endpoints the service exposes
+- /health + /readiness endpoints
+- set a minimum threshold for when to failover to backup API call
+- Add a pool to the DB
+- log on slow queries
+- add RequestIds to each call
+- exponential backoffs on api calls
+- use redis to centeralise overall %failure rates
+- swagger/openAPI spec for the endpoints the service exposes
 
 extra extra notes:
 
