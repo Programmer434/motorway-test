@@ -3,6 +3,7 @@ import axios from 'axios';
 import { HttpClient } from './types';
 import { XMLParser } from 'fast-xml-parser';
 import { PremiumCarValuationResponse } from '@app/premium-car/types';
+import { ServiceUnavailableError } from '@app/errors';
 export class PremiumCarClient implements HttpClient {
   private baseUrl: string;
   constructor(baseUrl?: string) {
@@ -11,20 +12,27 @@ export class PremiumCarClient implements HttpClient {
   }
 
   async getValuation(vrm: string, mileage: number): Promise<VehicleValuation> {
-    axios.defaults.baseURL = this.baseUrl;
+    try {
+      axios.defaults.baseURL = this.baseUrl;
 
-    axios.defaults.headers['Content-Type'] = 'application/xml';
-    const xmlResponse = await axios.get<PremiumCarValuationResponse>(
-      `valuations/${vrm}?mileage=${mileage}`,
-    );
-    const parser = new XMLParser();
-    const parsedResponse = parser.parse(xmlResponse.data.toString()).root;
+      axios.defaults.headers['Content-Type'] = 'application/xml';
+      const xmlResponse = await axios.get<PremiumCarValuationResponse>(
+        `valuations/${vrm}?mileage=${mileage}`,
+      );
+      const parser = new XMLParser();
+      const parsedResponse = parser.parse(xmlResponse.data.toString()).root;
 
-    const valuation = new VehicleValuation();
+      const valuation = new VehicleValuation();
 
-    valuation.vrm = vrm;
-    valuation.lowestValue = parsedResponse.ValuationDealershipMinimum;
-    valuation.highestValue = parsedResponse.ValuationDealershipMaximum;
-    return valuation;
+      valuation.vrm = vrm;
+      valuation.lowestValue = parsedResponse.ValuationDealershipMinimum;
+      valuation.highestValue = parsedResponse.ValuationDealershipMaximum;
+      return valuation;
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        throw new ServiceUnavailableError(error.message);
+      }
+      throw error;
+    }
   }
 }
