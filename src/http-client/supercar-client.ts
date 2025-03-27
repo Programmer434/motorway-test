@@ -13,7 +13,7 @@ export class SuperCarClient implements HttpClient {
   async getValuation(vrm: string, mileage: number): Promise<VehicleValuation> {
     try {
       axios.defaults.baseURL = this.baseUrl;
-      axios.defaults.headers['Content-Type'] = 'application/xml';
+      axios.defaults.headers['Content-Type'] = 'application/json';
 
       const response = await axios.get<SuperCarValuationResponse>(
         `valuations/${vrm}?mileage=${mileage}`,
