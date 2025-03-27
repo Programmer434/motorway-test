@@ -120,12 +120,30 @@ The URI for this test stub in Mocky is https://run.mocky.io/v3/0dfda26a-3a5a-43e
 # Candidate Notes
 
 Here is a place for you to put any notes regarding the changes you made and the reasoning and what further changes you wish to suggest.
-TODO
-/health
-/readiness endpoints
-set a minimum threshold for failover
-pool db connections
+
+Changes made:
+
+- Updated tests to not use any real resources, mocking the DB and the API calls
+- Added tests for the /GET endpoint
+- Added http clients for both 3rd party valuation endpoints. These are then used in the parent client
+- All clients are tested through the use of nock (mocky could also be interchanged here but those could live under a differnet suite of intergration tests)
+- Added a failover mechanism for when the first call fails and or the overall failure rate hits 50%
+- Added the ground work for having custom Error handlers, with a 503 being reported should both calls fail
+
+These changes are broken down by each commit into the repo.
+
+Some further changes which could be made are:
+/health + /readiness endpoints
+set a minimum threshold for when to failover to backup API call
+Add a pool to the DB
 log on slow queries
+add RequestIds to each call
 exponential backoffs on api calls
 use redis to centeralise overall %failure rates
-dockerfile
+swagger/openAPI spec for the endpoints the service exposes
+
+extra extra notes:
+
+- Coming from a express + knexJs world the fastify framework and typeOrm was new to me, so this is based off abit of a crash course
+- I tried using the mockly endpoints provided in the docs https://run.mocky.io/v3/9245229e-5c57-44e1-964b-36c7fb29168b and https://run.mocky.io/v3/0dfda26a-3a5a-43e5-b68c-51f148eda473 but they didnt work for me. Got 404s
+- Thanks for reading!
